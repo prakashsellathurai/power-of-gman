@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from src.config import Config
+from src.config import CONFIGURATION
 
 
 class Position2D:
@@ -43,21 +43,20 @@ class Direction:
 
     @classmethod
     def from_string(cls, id_string):
-        angle = Config.QUADRANT_ANGLE[id_string]
+        angle = CONFIGURATION.QUADRANT_ANGLE[id_string]
         return cls(id_string=id_string, angle=angle)
 
     @classmethod
     def from_angle(cls, angle):
-        id_string = list(Config.QUADRANT_ANGLE.keys())[
-            list(Config.QUADRANT_ANGLE.values()).index(angle)
+        id_string = list(CONFIGURATION.QUADRANT_ANGLE.keys())[
+            list(CONFIGURATION.QUADRANT_ANGLE.values()).index(angle)
         ]
         return cls(id_string, angle)
 
     def rotate(self, target_angle):
         clock_rot = abs(target_angle - self.angle)
-        anti_clock_rot = abs(Config.COMPLETE_ANGLE - (target_angle - self.angle))
-        return min(clock_rot, anti_clock_rot) // Config.UNIT_ANGLE
-
+        anti_clock_rot = abs(CONFIGURATION.COMPLETE_ANGLE - (target_angle - self.angle))
+        return min(clock_rot, anti_clock_rot) // CONFIGURATION.UNIT_ANGLE
 
     def estimate_angular_dist(self, source, dest):
         dx, dy = source.offset_to(dest)
@@ -65,21 +64,33 @@ class Direction:
             return 0
 
         if dx > 0 and dy > 0:
-            target_angles = [Config.QUADRANT_ANGLE["E"], Config.QUADRANT_ANGLE["N"]]
+            target_angles = [
+                CONFIGURATION.QUADRANT_ANGLE["E"],
+                CONFIGURATION.QUADRANT_ANGLE["N"],
+            ]
         elif dx < 0 and dy > 0:
-            target_angles = [Config.QUADRANT_ANGLE["N"], Config.QUADRANT_ANGLE["W"]]
+            target_angles = [
+                CONFIGURATION.QUADRANT_ANGLE["N"],
+                CONFIGURATION.QUADRANT_ANGLE["W"],
+            ]
         elif dx < 0 and dy < 0:
-            target_angles = [Config.QUADRANT_ANGLE["W"], Config.QUADRANT_ANGLE["S"]]
+            target_angles = [
+                CONFIGURATION.QUADRANT_ANGLE["W"],
+                CONFIGURATION.QUADRANT_ANGLE["S"],
+            ]
         elif dx > 0 and dy < 0:
-            target_angles = [Config.QUADRANT_ANGLE["S"], Config.QUADRANT_ANGLE["E"]]
+            target_angles = [
+                CONFIGURATION.QUADRANT_ANGLE["S"],
+                CONFIGURATION.QUADRANT_ANGLE["E"],
+            ]
         elif dx == 0 and dy > 0:
-            target_angles = [Config.QUADRANT_ANGLE["N"]]
+            target_angles = [CONFIGURATION.QUADRANT_ANGLE["N"]]
         elif dx > 0 and dy == 0:
-            target_angles = [Config.QUADRANT_ANGLE["E"]]
+            target_angles = [CONFIGURATION.QUADRANT_ANGLE["E"]]
         elif dx == 0 and dy < 0:
-            target_angles = [Config.QUADRANT_ANGLE["S"]]
+            target_angles = [CONFIGURATION.QUADRANT_ANGLE["S"]]
         elif dx < 0 and dy == 0:
-            target_angles = [Config.QUADRANT_ANGLE["W"]]
+            target_angles = [CONFIGURATION.QUADRANT_ANGLE["W"]]
 
         angular_rotations = (
             len(target_angles)

@@ -3,59 +3,37 @@ from collections import deque
 from dataclasses import dataclass
 
 from src.navigation import Position2D, Direction
-from src.config import Config
+from src.config import CONFIGURATION
 
 
-
-class GManPlayer:
-    def __init__(self, s_pos: Position2D, s_dir: Direction, power: int):
-        self.pos = s_pos
-        self.dir = s_dir
+class Gman:
+    def __init__(self, position: Position2D, direction: Direction, power: int):
+        self.position = position
+        self.direction = direction
         self.power = power
 
-    def move_to(self, new_pos: Position2D, cost: int):
-        remaining_power = self.power - cost
-        self.pos = new_pos
-        self.power = remaining_power
-        return self.__init__(self.pos, self.dir, self.power)
+    @classmethod
+    def init(self, sourceX, sourceY, sourcedir):
+        position = Position2D(sourceX, sourceY)
+        direction = Direction.from_string(sourcedir)
+        power = CONFIGURATION.INIT_POWER
+        return self(position, direction, power)
 
-    @property
-    def angle(self):
-        return self.dir.angle
+    def move(self, destinationX, destinationY):
+        destination = Position2D(destinationX, destinationY)
+        cost = self.estimate_cost(destination)
+        self.position = destination
+        self.power -= cost
 
-    def cost_to_reach(self, destination, unit_move_cost, unit_turn_cost):
-        moves = destination.dist_from(self.pos)
-        move_cost = unit_move_cost * moves
+    def estimate_cost(self, target_position):
+        moves = target_position.dist_from(self.position)
+        move_cost = int(CONFIGURATION.MOVE_COST * moves)
 
-        turns = self.dir.estimate_angular_dist(destination, self.pos)
-        turn_cost = unit_turn_cost * turns
+        turns = self.direction.estimate_angular_dist(target_position, self.position)
+        turn_cost = int(CONFIGURATION.TURN_COST * turns)
 
         total_cost = move_cost + turn_cost
         return total_cost
 
-
-class GManGame:
-    def __init__(self):
-        self.m = self.n = Config.GRID_SIZE
-
-        self.unit_turn_cost = Config.TURN_COST
-        self.unit_move_cost = Config.MOVE_COST
-        self.init_power = Config.INIT_POWER
-
-    def init_player(self, sX, sY, sdir):
-        source = Position2D(sX, sY)
-        player_dir = Direction.from_string(sdir)
-
-        self.player = GManPlayer(source, player_dir, self.init_power)
-
-    def move_player_to(self, dX, dY):
-        destination = Position2D(dX, dY)
-
-        total_cost = self.player.cost_to_reach(
-            destination, self.unit_move_cost, self.unit_turn_cost
-        )
-
-        self.player.move_to(destination, total_cost)
-
-    def calculate_power(self):
-        return int(self.player.power)
+    def print_power(self):
+        print("POWER", self.power)

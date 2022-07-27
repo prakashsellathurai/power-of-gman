@@ -1,5 +1,6 @@
-class Config:
+class CONFIGURATION:
     GRID_SIZE = 6
+
     TURN_COST = 5
     MOVE_COST = 10
     INIT_POWER = 200

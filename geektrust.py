@@ -2,7 +2,7 @@ import sys
 from src.gman import Gman
 
 
-def get_cmd_and_args(line):
+def get_command_and_arguments(line):
     line = line.split()
     return line[0], line[1:]
 
@@ -12,13 +12,15 @@ def main():
     f = open(file_path, "r")
 
     for line in f.readlines():
-        cmd, args = get_cmd_and_args(line)
+        command, arguments = get_command_and_arguments(line)
 
-        if cmd == "SOURCE":
-            gman = Gman.init(args[0], args[1], args[2])
-        elif cmd == "DESTINATION":
-            gman.move(args[0], args[1])
-        elif cmd == "PRINT_POWER":
+        if command == "SOURCE":
+            sourceX, sourceY, sourcedir = arguments
+            gman = Gman.init(sourceX, sourceY, sourcedir)
+        elif command == "DESTINATION":
+            destinationX, destinationY = arguments
+            gman.move(destinationX, destinationY)
+        elif command == "PRINT_POWER":
             gman.print_power()
 
 
