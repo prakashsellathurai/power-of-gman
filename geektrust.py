@@ -15,11 +15,11 @@ def main():
         command, arguments = get_command_and_arguments(line)
 
         if command == "SOURCE":
-            sourceX, sourceY, sourcedir = arguments
-            gman = Gman.init(sourceX, sourceY, sourcedir)
+            source_x, source_y, sourcedir = arguments
+            gman = Gman.init(source_x, source_y, sourcedir)
         elif command == "DESTINATION":
-            destinationX, destinationY = arguments
-            gman.move(destinationX, destinationY)
+            destination_x, destination_y = arguments
+            gman.move(destination_x, destination_y)
         elif command == "PRINT_POWER":
             gman.print_power()
 

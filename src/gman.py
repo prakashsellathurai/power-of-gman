@@ -13,14 +13,14 @@ class Gman:
         self.power = power
 
     @classmethod
-    def init(self, sourceX, sourceY, sourcedir):
-        position = Position2D(sourceX, sourceY)
+    def init(self, source_x, source_y, sourcedir):
+        position = Position2D(source_x, source_y)
         direction = Direction.from_string(sourcedir)
         power = CONFIGURATION.INIT_POWER
         return self(position, direction, power)
 
-    def move(self, destinationX, destinationY):
-        destination = Position2D(destinationX, destinationY)
+    def move(self, destination_x, destination_y):
+        destination = Position2D(destination_x, destination_y)
         cost = self.estimate_cost(destination)
         self.position = destination
         self.power -= cost
