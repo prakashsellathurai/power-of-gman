@@ -11,16 +11,22 @@ def main():
     file_path = sys.argv[1]
     f = open(file_path, "r")
 
+    source_x = 0
+    source_y = 0
+    sourcedir = ""
+    destination_x = 0
+    destination_y = 0
+
     for line in f.readlines():
         command, arguments = get_command_and_arguments(line)
 
         if command == "SOURCE":
             source_x, source_y, sourcedir = arguments
-            gman = Gman.init(source_x, source_y, sourcedir)
         elif command == "DESTINATION":
             destination_x, destination_y = arguments
-            gman.move(destination_x, destination_y)
         elif command == "PRINT_POWER":
+            gman = Gman.init(source_x, source_y, sourcedir)
+            gman.move(destination_x, destination_y)
             gman.print_power()
 
 

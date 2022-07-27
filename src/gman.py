@@ -1,9 +1,9 @@
-from enum import Enum
-from collections import deque
-from dataclasses import dataclass
-
 from src.navigation import Position2D, Direction
-from src.config import CONFIGURATION
+
+
+TURN_COST = 5
+MOVE_COST = 10
+INIT_POWER = 200
 
 
 class Gman:
@@ -13,11 +13,11 @@ class Gman:
         self.power = power
 
     @classmethod
-    def init(self, source_x, source_y, sourcedir):
+    def init(cls, source_x, source_y, sourcedir):
         position = Position2D(source_x, source_y)
         direction = Direction.from_string(sourcedir)
-        power = CONFIGURATION.INIT_POWER
-        return self(position, direction, power)
+        power = INIT_POWER
+        return cls(position, direction, power)
 
     def move(self, destination_x, destination_y):
         destination = Position2D(destination_x, destination_y)
@@ -27,10 +27,10 @@ class Gman:
 
     def estimate_cost(self, target_position):
         moves = target_position.dist_from(self.position)
-        move_cost = int(CONFIGURATION.MOVE_COST * moves)
+        move_cost = int(MOVE_COST * moves)
 
-        turns = self.direction.estimate_angular_dist(target_position, self.position)
-        turn_cost = int(CONFIGURATION.TURN_COST * turns)
+        turns = self.direction.estimate_angle(target_position, self.position)
+        turn_cost = int(TURN_COST * turns)
 
         total_cost = move_cost + turn_cost
         return total_cost
