@@ -1,5 +1,5 @@
 import sys
-from src.gman import GManGame
+from src.gman import Gman
 
 
 def get_cmd_and_args(line):
@@ -9,20 +9,17 @@ def get_cmd_and_args(line):
 
 def main():
     file_path = sys.argv[1]
-
     f = open(file_path, "r")
-
-    gmangame = GManGame()
 
     for line in f.readlines():
         cmd, args = get_cmd_and_args(line)
 
         if cmd == "SOURCE":
-            game.init_player(args[0], args[1], args[2])
+            gman = Gman.init(args[0], args[1], args[2])
         elif cmd == "DESTINATION":
-            game.move_player_to(args[0], args[1])
+            gman.move(args[0], args[1])
         elif cmd == "PRINT_POWER":
-            print("POWER", game.calculate_power())
+            gman.print_power()
 
 
 if __name__ == "__main__":
