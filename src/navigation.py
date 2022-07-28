@@ -1,9 +1,89 @@
-from dataclasses import dataclass
-
+from enum import Enum
 
 UNIT_ANGLE = 90
 COMPLETE_ANGLE = 360
-QUADRANT_ANGLE = {"E": 0, "N": 90, "W": 180, "S": 270}
+
+EAST_ANGLE = 0
+WEST_ANGLE = 180
+NORTH_ANGLE = 90
+SOUTH_ANGLE = 270
+
+
+class COORDINATE(Enum):
+    EAST = EAST_ANGLE
+    NORTH = NORTH_ANGLE
+    WEST = WEST_ANGLE
+    SOUTH = SOUTH_ANGLE
+
+    @property
+    def angle(self):
+        return self.value
+
+
+DIRECTION_SWITCH = {
+    "E": COORDINATE.EAST,
+    "N": COORDINATE.NORTH,
+    "W": COORDINATE.WEST,
+    "S": COORDINATE.SOUTH,
+}
+
+UP_RIGHT_PATH = [
+    COORDINATE.EAST,
+    COORDINATE.NORTH,
+]
+
+UP_LEFT_PATH = [
+    COORDINATE.WEST,
+    COORDINATE.NORTH,
+]
+
+DOWN_LEFT_PATH = [
+    COORDINATE.WEST,
+    COORDINATE.SOUTH,
+]
+
+DOWN_RIGHT_PATH = [
+    COORDINATE.EAST,
+    COORDINATE.SOUTH,
+]
+
+
+class Compass:
+    @classmethod
+    def get_angle(cls, direction_string):
+        direction = DIRECTION_SWITCH[direction_string]
+        return direction.angle
+
+    @classmethod
+    def get_directions(cls, dx: int, dy: int):
+        if dx == 0 or dy == 0:
+            directions = [cls.get_normal_direction(dx, dy)]
+        else:
+            directions = cls.get_Lshaped_directions(dx, dy)
+
+        return directions
+
+    @staticmethod
+    def get_normal_direction(dx: int, dy: int):
+        if dx == 0 and dy > 0:
+            return COORDINATE.NORTH
+        if dx > 0 and dy == 0:
+            return COORDINATE.EAST
+        if dx == 0 and dy < 0:
+            return COORDINATE.SOUTH
+        else:
+            return COORDINATE.WEST
+
+    @staticmethod
+    def get_Lshaped_directions(dx: int, dy: int):
+        if dx > 0 and dy > 0:
+            return UP_RIGHT_PATH
+        if dx < 0 and dy > 0:
+            return UP_LEFT_PATH
+        if dx < 0 and dy < 0:
+            return DOWN_LEFT_PATH
+        else:
+            return DOWN_RIGHT_PATH
 
 
 class Position2D:
@@ -11,95 +91,61 @@ class Position2D:
         self.x = float(x)
         self.y = float(y)
 
-    def __eq__(self, other):
-        if isinstance(other, Position2D):
-            return self.x == other.x and self.y == other.y
-        return NotImplemented
-
-    def __sub__(self, other):
-        if isinstance(other, Position2D):
-            diff_x = self.x - other.x
-            diff_y = self.y - other.y
-            return Position2D(diff_x, diff_y)
-
     @property
-    def coords(self):
+    def coordinates(self):
         return self.x, self.y
 
-    def offset_to(self, other):
-        offset = self - other
-        dx, dy = offset.coords
+    def difference(self, other):
+        diff_x = self.x - other.x
+        diff_y = self.y - other.y
+        return Position2D(diff_x, diff_y)
+
+    def offset(self, other):
+        offset = self.difference(other)
+        dx, dy = offset.coordinates
         return dx, dy
 
-    def __hash__(self):
-        return hash((self.x, self.y))
-
-    def dist_from(self, dest):
-        dx, dy = self.offset_to(dest)
+    def distance(self, dest):
+        dx, dy = self.offset(dest)
         return abs(dx) + abs(dy)
 
 
-@dataclass
 class Direction:
-    id_string: str
-    angle: float
+    def __init__(self, id_string: str):
+        self.id_string = id_string
+        self.angle = Compass.get_angle(id_string)
 
-    @classmethod
-    def from_string(cls, id_string):
-        angle = QUADRANT_ANGLE[id_string]
-        return cls(id_string=id_string, angle=angle)
+    def difference(self, target_direction):
+        target_angle = target_direction.angle
 
-    @classmethod
-    def from_angle(cls, angle):
-        id_string = list(QUADRANT_ANGLE.keys())[
-            list(QUADRANT_ANGLE.values()).index(angle)
-        ]
-        return cls(id_string, angle)
+        angle_difference = target_angle - self.angle
 
-    def rotate(self, target_angle):
-        clock_rot = abs(target_angle - self.angle)
-        anti_clock_rot = abs(COMPLETE_ANGLE - (target_angle - self.angle))
-        return min(clock_rot, anti_clock_rot) // UNIT_ANGLE
+        left_difference = abs(angle_difference)
+        right_difference = abs(COMPLETE_ANGLE - angle_difference)
 
-    def estimate_angle(self, source, dest):
-        dx, dy = source.offset_to(dest)
+        minimal_difference = min(left_difference, right_difference)
+
+        return minimal_difference // UNIT_ANGLE
+
+    def estimate_turns(self, source, dest):
+        dx, dy = source.offset(dest)
+
         if dx == 0 and dy == 0:
             return 0
 
-        if dx > 0 and dy > 0:
-            target_angles = [
-                QUADRANT_ANGLE["E"],
-                QUADRANT_ANGLE["N"],
-            ]
-        elif dx < 0 and dy > 0:
-            target_angles = [
-                QUADRANT_ANGLE["N"],
-                QUADRANT_ANGLE["W"],
-            ]
-        elif dx < 0 and dy < 0:
-            target_angles = [
-                QUADRANT_ANGLE["W"],
-                QUADRANT_ANGLE["S"],
-            ]
-        elif dx > 0 and dy < 0:
-            target_angles = [
-                QUADRANT_ANGLE["S"],
-                QUADRANT_ANGLE["E"],
-            ]
-        elif dx == 0 and dy > 0:
-            target_angles = [QUADRANT_ANGLE["N"]]
-        elif dx > 0 and dy == 0:
-            target_angles = [QUADRANT_ANGLE["E"]]
-        elif dx == 0 and dy < 0:
-            target_angles = [QUADRANT_ANGLE["S"]]
-        elif dx < 0 and dy == 0:
-            target_angles = [QUADRANT_ANGLE["W"]]
-        else:
-            target_angles = []
+        directions = Compass.get_directions(dx, dy)
 
-        angular_rotations = (
-            len(target_angles)
-            - 1
-            + min([self.rotate(angle) for angle in target_angles])
-        )
-        return angular_rotations
+        min_turns = None
+        n = len(directions)
+
+        min_turns = COMPLETE_ANGLE
+        for direction in directions:
+            turns = self.difference(direction)
+            if turns < min_turns:
+                min_turns = turns
+
+        additional_turns = n - 1
+
+        total_turns = min_turns + additional_turns
+
+        return total_turns

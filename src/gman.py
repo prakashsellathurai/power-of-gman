@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from src.navigation import Position2D, Direction
 
 
@@ -6,16 +7,16 @@ MOVE_COST = 10
 INIT_POWER = 200
 
 
+@dataclass
 class Gman:
-    def __init__(self, position: Position2D, direction: Direction, power: int):
-        self.position = position
-        self.direction = direction
-        self.power = power
+    position: Position2D
+    direction: Direction
+    power: int
 
     @classmethod
-    def init(cls, source_x, source_y, sourcedir):
+    def initialize(cls, source_x, source_y, sourcedir):
         position = Position2D(source_x, source_y)
-        direction = Direction.from_string(sourcedir)
+        direction = Direction(sourcedir)
         power = INIT_POWER
         return cls(position, direction, power)
 
@@ -26,10 +27,10 @@ class Gman:
         self.power -= cost
 
     def estimate_cost(self, target_position):
-        moves = target_position.dist_from(self.position)
+        moves = target_position.distance(self.position)
         move_cost = int(MOVE_COST * moves)
 
-        turns = self.direction.estimate_angle(target_position, self.position)
+        turns = self.direction.estimate_turns(target_position, self.position)
         turn_cost = int(TURN_COST * turns)
 
         total_cost = move_cost + turn_cost

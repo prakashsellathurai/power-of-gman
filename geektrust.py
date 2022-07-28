@@ -25,7 +25,7 @@ def main():
         elif command == "DESTINATION":
             destination_x, destination_y = arguments
         elif command == "PRINT_POWER":
-            gman = Gman.init(source_x, source_y, sourcedir)
+            gman = Gman.initialize(source_x, source_y, sourcedir)
             gman.move(destination_x, destination_y)
             gman.print_power()
 
