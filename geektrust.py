@@ -1,5 +1,5 @@
 import sys
-from src.gman import Gman
+from src.game import Game
 
 
 def get_command_and_arguments(line):
@@ -25,9 +25,9 @@ def main():
         elif command == "DESTINATION":
             destination_x, destination_y = arguments
         elif command == "PRINT_POWER":
-            gman = Gman.initialize(source_x, source_y, sourcedir)
-            gman.move(destination_x, destination_y)
-            gman.print_power()
+            game = Game.initialize(source_x, source_y, sourcedir)
+            game.move(destination_x, destination_y)
+            game.print_power()
 
 
 if __name__ == "__main__":

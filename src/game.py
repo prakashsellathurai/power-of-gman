@@ -8,7 +8,7 @@ INIT_POWER = 200
 
 
 @dataclass
-class Gman:
+class Game:
     position: Position2D
     direction: Direction
     power: int
